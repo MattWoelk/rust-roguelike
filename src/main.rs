@@ -1,5 +1,5 @@
 use specs::world::Builder;
-use specs::{Component, Read, ReadStorage, WriteStorage, System, VecStorage, World};
+use specs::{Component, Join, Read, ReadStorage, System, VecStorage, World, WriteStorage};
 use tcod::colors;
 use tcod::console::*;
 use tcod::input::{Key, KeyCode};
@@ -51,7 +51,6 @@ impl<'a> System<'a> for PrintingSystem {
 
     fn run(&mut self, data: Self::SystemData) {
         println!("Running print system");
-        use specs::Join;
         let (position, print_me) = data;
         for (pos, _) in (&position, &print_me).join() {
             println!("{:?}", pos);
@@ -65,7 +64,6 @@ impl<'a> System<'a> for NotPrintingSystem {
 
     fn run(&mut self, data: Self::SystemData) {
         println!("Running NOT print system");
-        use specs::Join;
         let (position, print_me) = data;
         for (pos, _) in (&position, !&print_me).join() {
             println!("{:?}", pos);
@@ -85,7 +83,6 @@ impl<'a> System<'a> for Render {
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        use specs::Join;
         use KeyCode::*;
 
         let root = &mut self.window;
@@ -119,13 +116,12 @@ impl<'a> System<'a> for Render {
 struct PlayerMove;
 impl<'a> System<'a> for PlayerMove {
     type SystemData = (
-    WriteStorage<'a, Position>,
-    ReadStorage<'a, PlayerController>,
-    Read<'a, GameState>,
+        WriteStorage<'a, Position>,
+        ReadStorage<'a, PlayerController>,
+        Read<'a, GameState>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        use specs::Join;
         use KeyCode::*;
         let (mut position, player_controlled, game_state) = data;
         if let Some(key) = game_state.key_press {
@@ -135,7 +131,7 @@ impl<'a> System<'a> for PlayerMove {
                     Down => pos.y += 1,
                     Left => pos.x -= 1,
                     Right => pos.x += 1,
-                    _ => {},
+                    _ => {}
                 }
             }
         }
@@ -187,7 +183,7 @@ fn main() {
         .build();
 
     loop {
-        dispatcher.dispatch(&mut world.res);
+        dispatcher.dispatch(&world.res);
         let game_state = world.read_resource::<GameState>();
         if game_state.end {
             break;

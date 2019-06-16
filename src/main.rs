@@ -1,5 +1,7 @@
 use specs::world::Builder;
-use specs::{Component, Join, Read, ReadStorage, System, VecStorage, World, WriteStorage};
+use specs::{
+    Component, Join, NullStorage, Read, ReadStorage, System, VecStorage, World, WriteStorage,
+};
 use tcod::colors;
 use tcod::console::*;
 use tcod::input::{Key, KeyCode};
@@ -31,11 +33,9 @@ struct CharacterGlyph {
 #[storage(VecStorage)]
 struct PrintMeTag;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Component)]
+#[storage(NullStorage)]
 struct PlayerController;
-impl Component for PlayerController {
-    type Storage = specs::NullStorage<Self>;
-}
 
 #[derive(Debug, Default)]
 struct GameState {

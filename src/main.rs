@@ -4,6 +4,9 @@ use tcod::colors;
 use tcod::console::*;
 use tcod::input::{Key, KeyCode};
 
+#[macro_use]
+extern crate specs_derive;
+
 const SCREEN_WIDTH: i32 = 80;
 const SCREEN_HEIGHT: i32 = 50;
 const LIMIT_FPS: i32 = 20;
@@ -18,20 +21,15 @@ impl Component for Position {
     type Storage = VecStorage<Self>;
 }
 
+#[derive(Debug, Component)]
+#[storage(VecStorage)]
 struct CharacterGlyph {
     glyph: char,
 }
 
-impl Component for CharacterGlyph {
-    type Storage = VecStorage<Self>;
-}
-
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Component)]
+#[storage(VecStorage)]
 struct PrintMeTag;
-
-impl Component for PrintMeTag {
-    type Storage = specs::NullStorage<Self>;
-}
 
 #[derive(Debug, Default)]
 struct PlayerController;

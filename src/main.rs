@@ -87,6 +87,8 @@ impl<'a> System<'a> for Render {
 
         let (sprites, positions, mut game_state) = data;
 
+        game_state.end = false;
+
         root.clear();
         for (sprite, pos) in (&sprites, &positions).join() {
             root.put_char(pos.x, pos.y, sprite.glyph, BackgroundFlag::None);
@@ -107,7 +109,7 @@ impl<'a> System<'a> for Render {
         };
 
         game_state.key_press = key_press;
-        game_state.end = root.window_closed();
+        game_state.end = game_state.end | root.window_closed();
     }
 }
 

@@ -6,6 +6,12 @@ use tcod::colors;
 use tcod::console::*;
 use tcod::input::{Key, KeyCode};
 
+mod components;
+use components::{Position, PrintMeTag};
+
+mod systems;
+use systems::PrintingSystem;
+
 #[macro_use]
 extern crate specs_derive;
 
@@ -13,25 +19,11 @@ const SCREEN_WIDTH: i32 = 80;
 const SCREEN_HEIGHT: i32 = 50;
 const LIMIT_FPS: i32 = 20;
 
-#[derive(Debug, PartialEq)]
-struct Position {
-    x: i32,
-    y: i32,
-}
-
-impl Component for Position {
-    type Storage = VecStorage<Self>;
-}
-
 #[derive(Debug, Component)]
 #[storage(VecStorage)]
 struct CharacterGlyph {
     glyph: char,
 }
-
-#[derive(Debug, Default, Component)]
-#[storage(VecStorage)]
-struct PrintMeTag;
 
 #[derive(Debug, Default, Component)]
 #[storage(NullStorage)]
@@ -41,19 +33,6 @@ struct PlayerController;
 struct GameState {
     end: bool,
     key_press: Option<KeyCode>,
-}
-
-struct PrintingSystem;
-impl<'a> System<'a> for PrintingSystem {
-    type SystemData = (ReadStorage<'a, Position>, ReadStorage<'a, PrintMeTag>);
-
-    fn run(&mut self, data: Self::SystemData) {
-        println!("Running print system");
-        let (position, print_me) = data;
-        for (pos, _) in (&position, &print_me).join() {
-            println!("{:?}", pos);
-        }
-    }
 }
 
 struct NotPrintingSystem;

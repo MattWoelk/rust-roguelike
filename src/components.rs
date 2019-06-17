@@ -1,4 +1,4 @@
-use specs::{Component, VecStorage};
+use specs::{Component, NullStorage, VecStorage};
 
 #[derive(Debug, PartialEq, Component)]
 #[storage(VecStorage)]
@@ -10,3 +10,13 @@ pub struct Position {
 #[derive(Debug, Default, Component)]
 #[storage(VecStorage)]
 pub struct PrintMeTag;
+
+#[derive(Debug, Component)]
+#[storage(VecStorage)]
+pub struct CharacterGlyph {
+    pub glyph: char,
+}
+
+#[derive(Debug, Default, Component)]
+#[storage(NullStorage)]
+pub struct PlayerController;

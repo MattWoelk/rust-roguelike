@@ -1,4 +1,5 @@
 use specs::{Component, NullStorage, VecStorage};
+use specs_derive::Component;
 
 #[derive(Debug, PartialEq, Component)]
 #[storage(VecStorage)]

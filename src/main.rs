@@ -10,9 +10,6 @@ use components::{CharacterGlyph, PlayerController, Position, PrintMeTag};
 mod systems;
 use systems::{NotPrintingSystem, PlayerMove, PrintingSystem, Render};
 
-#[macro_use]
-extern crate specs_derive;
-
 const SCREEN_WIDTH: i32 = 80;
 const SCREEN_HEIGHT: i32 = 50;
 const LIMIT_FPS: i32 = 20;

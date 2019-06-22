@@ -11,3 +11,5 @@ Focus the black text window to give keyboard inputs, and watch the red rectangle
 Move too far and the game exits (win condition??)
 
 ![screenshot](https://github.com/MattWoelk/rust-roguelike/raw/master/resources/vulkan_ecs_test_1.gif)
+
+(probably Windows-only for now)

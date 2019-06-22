@@ -32,10 +32,15 @@ struct Vertex {
 }
 vulkano::impl_vertex!(Vertex, position);
 
+enum VulkanFuture {
+    NowFuture(vulkano::sync::NowFuture),
+    //FenceSignalFuture(vulkano::sync::FenceSignalFuture<u32>),
+}
+
 pub struct VulkanTriangleRenderer {
     instance: Option<Arc<Instance>>,
     device: Arc<Device>,
-    previous_frame_end: Box<GpuFuture>,
+    previous_frame_end: Box<dyn GpuFuture>,
     recreate_swapchain: bool,
     surface: Arc<vulkano::swapchain::Surface<Window>>,
     swapchain: Arc<Swapchain<Window>>,
@@ -379,7 +384,7 @@ void main() {
         //
         // Destroying the `GpuFuture` blocks until the GPU is finished executing it. In order to avoid
         // that, we store the submission of the previous frame here.
-        let previous_frame_end = Box::new(sync::now(device.clone())) as Box<GpuFuture>;
+        let previous_frame_end = Box::new(sync::now(device.clone()));
 
         VulkanTriangleRenderer {
             instance,
@@ -516,32 +521,34 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
         .build()
         .unwrap();
 
-        let future = self.previous_frame_end
-            .join(acquire_future)
-            .then_execute(self.queue.clone(), command_buffer)
-            .unwrap()
-            // The color output is now expected to contain our triangle. But in order to show it on
-            // the screen, we have to *present* the image by calling `present`.
-            //
-            // This function does not actually present the image immediately. Instead it submits a
-            // present command at the end of the queue. This means that it will only be presented once
-            // the GPU has finished executing the command buffer that draws the triangle.
-            .then_swapchain_present(self.queue.clone(), self.swapchain.clone(), image_num)
-            .then_signal_fence_and_flush();
+        self.previous_frame_end = {
+            let future = self.previous_frame_end.as_ref()
+                .join(acquire_future)
+                .then_execute(self.queue.clone(), command_buffer)
+                .unwrap()
+                // The color output is now expected to contain our triangle. But in order to show it on
+                // the screen, we have to *present* the image by calling `present`.
+                //
+                // This function does not actually present the image immediately. Instead it submits a
+                // present command at the end of the queue. This means that it will only be presented once
+                // the GPU has finished executing the command buffer that draws the triangle.
+                .then_swapchain_present(self.queue.clone(), self.swapchain.clone(), image_num)
+                .then_signal_fence_and_flush();
 
-        match future {
-            Ok(future) => {
-                self.previous_frame_end = Box::new(future) as Box<_>;
+            match future {
+                Ok(future) => {
+                    Box::new(future) as Box<_>
+                }
+                Err(FlushError::OutOfDate) => {
+                    self.recreate_swapchain = true;
+                    Box::new(sync::now(self.device.clone())) as Box<_>
+                }
+                Err(e) => {
+                    println!("{:?}", e);
+                    Box::new(sync::now(self.device.clone())) as Box<_>
+                }
             }
-            Err(FlushError::OutOfDate) => {
-                self.recreate_swapchain = true;
-                self.previous_frame_end = Box::new(sync::now(self.device.clone())) as Box<_>;
-            }
-            Err(e) => {
-                println!("{:?}", e);
-                self.previous_frame_end = Box::new(sync::now(self.device.clone())) as Box<_>;
-            }
-        }
+        };
 
         // Note that in more complex programs it is likely that one of `acquire_next_image`,
         // `command_buffer::submit`, or `present` will block for some time. This happens when the

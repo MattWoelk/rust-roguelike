@@ -16,13 +16,14 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
     fn setup(&mut self, res: &mut Resources) {
         use specs::prelude::SystemData;
         Self::SystemData::setup(res);
+        self.reader = 4;
     }
 
     fn run(&mut self, data: Self::SystemData) {
         println!("Running vulkan system");
         let position = data;
         for pos in (&position).join() {
-            println!("{:?}", pos);
+            println!("{:?} - {}", pos, self.reader);
         }
     }
 }

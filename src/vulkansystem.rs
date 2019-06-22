@@ -419,7 +419,9 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
         // accumulating and you will eventually reach an out of memory error.
         // Calling this function polls various fences in order to determine what the GPU has
         // already processed, and frees the resources that are no longer needed.
-        self.previous_frame_end.cleanup_finished();
+        //let previous_frame_end = Box::new(sync::now(self.device.clone()));
+        let mut previous_frame_end = Box::new(sync::now(self.device.clone())) as Box<GpuFuture>;
+        previous_frame_end.cleanup_finished();
 
         let window = self.surface.window();
 
@@ -521,10 +523,8 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
         .build()
         .unwrap();
 
-        self.previous_frame_end = {
-            let future = self
-                .previous_frame_end
-                .as_ref()
+        previous_frame_end = {
+            let future = previous_frame_end
                 .join(acquire_future)
                 .then_execute(self.queue.clone(), command_buffer)
                 .unwrap()

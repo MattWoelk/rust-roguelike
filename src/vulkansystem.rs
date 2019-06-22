@@ -33,7 +33,6 @@ struct Vertex {
 vulkano::impl_vertex!(Vertex, position);
 
 pub struct VulkanTriangleRenderer {
-    instance: Option<Arc<Instance>>,
     device: Arc<Device>,
     previous_frame_end: Box<dyn GpuFuture>,
     recreate_swapchain: bool,
@@ -57,7 +56,7 @@ pub struct VulkanTriangleRenderer {
 
 impl VulkanTriangleRenderer {
     pub fn new() -> Self {
-        let instance = Some({
+        let instance = {
             // When we create an instance, we have to pass a list of extensions that we want to enable.
             //
             // All the window-drawing functionalities are part of non-core extensions that we need
@@ -67,7 +66,7 @@ impl VulkanTriangleRenderer {
 
             // Now creating the instance.
             Instance::new(None, &extensions, None).unwrap()
-        });
+        };
 
         // We then choose which physical device to use.
         //
@@ -83,7 +82,7 @@ impl VulkanTriangleRenderer {
         //
         // For the sake of the example we are just going to use the first device, which should work
         // most of the time.
-        let instance_ya = instance.clone().unwrap();
+        let instance_ya = instance.clone();
         let physical = PhysicalDevice::enumerate(&instance_ya).next().unwrap();
         // Some little debug infos.
         println!(
@@ -104,7 +103,7 @@ impl VulkanTriangleRenderer {
         // window and a cross-platform Vulkan surface that represents the surface of the window.
         let events_loop = EventsLoop::new();
         let surface = WindowBuilder::new()
-            .build_vk_surface(&events_loop, instance.clone().unwrap().clone())
+            .build_vk_surface(&events_loop, instance.clone())
             .unwrap();
         let window = surface.window();
 
@@ -383,7 +382,6 @@ void main() {
         let previous_frame_end = Box::new(sync::now(device.clone()));
 
         VulkanTriangleRenderer {
-            instance,
             device,
             previous_frame_end,
             recreate_swapchain,
@@ -410,7 +408,7 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
         let mut verts = vec![];
 
         for pos in (&position).join() {
-            println!("{:?}", pos);
+            println!("  {:?}", pos);
             verts.push(Vertex {
                 position: [pos.x as f32 / 30.0 - 0.3, pos.y as f32 / 30.0],
             });

@@ -325,29 +325,30 @@ void main() {
 
         // Before we draw we have to create what is called a pipeline. This is similar to an OpenGL
         // program, but much more specific.
-        let pipeline: Arc<dyn vulkano::pipeline::GraphicsPipelineAbstract + Send + Sync + 'static> = Arc::new(
-            GraphicsPipeline::start()
-                // We need to indicate the layout of the vertices.
-                // The type `SingleBufferDefinition` actually contains a template parameter corresponding
-                // to the type of each vertex. But in this code it is automatically inferred.
-                .vertex_input_single_buffer::<Vertex>()
-                // A Vulkan shader can in theory contain multiple entry points, so we have to specify
-                // which one. The `main` word of `main_entry_point` actually corresponds to the name of
-                // the entry point.
-                .vertex_shader(vs.main_entry_point(), ())
-                // The content of the vertex buffer describes a list of triangles.
-                .triangle_list()
-                // Use a resizable viewport set to draw over the entire window
-                .viewports_dynamic_scissors_irrelevant(1)
-                // See `vertex_shader`.
-                .fragment_shader(fs.main_entry_point(), ())
-                // We have to indicate which subpass of which render pass this pipeline is going to be used
-                // in. The pipeline will only be usable from this particular subpass.
-                .render_pass(Subpass::from(render_pass.clone(), 0).unwrap())
-                // Now that our builder is filled, we call `build()` to obtain an actual pipeline.
-                .build(device.clone())
-                .unwrap(),
-        );
+        let pipeline: Arc<dyn vulkano::pipeline::GraphicsPipelineAbstract + Send + Sync + 'static> =
+            Arc::new(
+                GraphicsPipeline::start()
+                    // We need to indicate the layout of the vertices.
+                    // The type `SingleBufferDefinition` actually contains a template parameter corresponding
+                    // to the type of each vertex. But in this code it is automatically inferred.
+                    .vertex_input_single_buffer::<Vertex>()
+                    // A Vulkan shader can in theory contain multiple entry points, so we have to specify
+                    // which one. The `main` word of `main_entry_point` actually corresponds to the name of
+                    // the entry point.
+                    .vertex_shader(vs.main_entry_point(), ())
+                    // The content of the vertex buffer describes a list of triangles.
+                    .triangle_list()
+                    // Use a resizable viewport set to draw over the entire window
+                    .viewports_dynamic_scissors_irrelevant(1)
+                    // See `vertex_shader`.
+                    .fragment_shader(fs.main_entry_point(), ())
+                    // We have to indicate which subpass of which render pass this pipeline is going to be used
+                    // in. The pipeline will only be usable from this particular subpass.
+                    .render_pass(Subpass::from(render_pass.clone(), 0).unwrap())
+                    // Now that our builder is filled, we call `build()` to obtain an actual pipeline.
+                    .build(device.clone())
+                    .unwrap(),
+            );
 
         // Dynamic viewports allow us to recreate just the viewport when the window is resized
         // Otherwise we would have to recreate the whole pipeline.
@@ -427,9 +428,8 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
         if self.recreate_swapchain {
             // Get the new dimensions of the window.
             let dimensions = if let Some(dimensions) = window.get_inner_size() {
-                let dimensions: (u32, u32) = dimensions
-                    .to_physical(window.get_hidpi_factor())
-                    .into();
+                let dimensions: (u32, u32) =
+                    dimensions.to_physical(window.get_hidpi_factor()).into();
                 [dimensions.0, dimensions.1]
             } else {
                 return;
@@ -522,7 +522,9 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
         .unwrap();
 
         self.previous_frame_end = {
-            let future = self.previous_frame_end.as_ref()
+            let future = self
+                .previous_frame_end
+                .as_ref()
                 .join(acquire_future)
                 .then_execute(self.queue.clone(), command_buffer)
                 .unwrap()
@@ -536,9 +538,7 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
                 .then_signal_fence_and_flush();
 
             match future {
-                Ok(future) => {
-                    Box::new(future) as Box<_>
-                }
+                Ok(future) => Box::new(future) as Box<_>,
                 Err(FlushError::OutOfDate) => {
                     self.recreate_swapchain = true;
                     Box::new(sync::now(self.device.clone())) as Box<_>
@@ -558,23 +558,23 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
         // wait would happen. Blocking may be the desired behavior, but if you don't want to
         // block you should spawn a separate thread dedicated to submissions.
 
-//        // Handling the window events in order to close the program when the user wants to close
-//        // it.
-//        let mut done = false;
-//        self.events_loop.poll_events(|ev| match ev {
-//            Event::WindowEvent {
-//                event: WindowEvent::CloseRequested,
-//                ..
-//            } => done = true,
-//            Event::WindowEvent {
-//                event: WindowEvent::Resized(_),
-//                ..
-//            } => self.recreate_swapchain = true,
-//            _ => (),
-//        });
-//        if done {
-//            return;
-//        }
+        //        // Handling the window events in order to close the program when the user wants to close
+        //        // it.
+        //        let mut done = false;
+        //        self.events_loop.poll_events(|ev| match ev {
+        //            Event::WindowEvent {
+        //                event: WindowEvent::CloseRequested,
+        //                ..
+        //            } => done = true,
+        //            Event::WindowEvent {
+        //                event: WindowEvent::Resized(_),
+        //                ..
+        //            } => self.recreate_swapchain = true,
+        //            _ => (),
+        //        });
+        //        if done {
+        //            return;
+        //        }
     }
 }
 

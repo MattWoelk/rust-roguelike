@@ -32,11 +32,6 @@ struct Vertex {
 }
 vulkano::impl_vertex!(Vertex, position);
 
-enum VulkanFuture {
-    NowFuture(vulkano::sync::NowFuture),
-    //FenceSignalFuture(vulkano::sync::FenceSignalFuture<u32>),
-}
-
 pub struct VulkanTriangleRenderer {
     instance: Option<Arc<Instance>>,
     device: Arc<Device>,
@@ -411,9 +406,30 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
     fn run(&mut self, data: Self::SystemData) {
         println!("Running vulkan system");
         let position = data;
+
+        let mut verts = vec![];
+
         for pos in (&position).join() {
             println!("{:?}", pos);
+            verts.push(Vertex {
+                position: [pos.x as f32 / 30.0 - 0.3, pos.y as f32 / 30.0],
+            });
+            verts.push(Vertex {
+                position: [pos.x as f32 / 30.0 + 0.3, pos.y as f32 / 30.0],
+            });
+            verts.push(Vertex {
+                position: [pos.x as f32 / 30.0, pos.y as f32 / 30.0 + 0.3],
+            });
         }
+
+        let vertex_buffer = {
+            CpuAccessibleBuffer::from_iter(
+                self.device.clone(),
+                BufferUsage::all(),
+                verts.iter().cloned(),
+            )
+            .unwrap()
+        };
 
         // It is important to call this function from time to time, otherwise resources will keep
         // accumulating and you will eventually reach an out of memory error.
@@ -509,7 +525,7 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
         .draw(
             self.pipeline.clone(),
             &self.dynamic_state,
-            vec![self.vertex_buffer.clone()],
+            vec![vertex_buffer.clone()],
             (),
             (),
         )

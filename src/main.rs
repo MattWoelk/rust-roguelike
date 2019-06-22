@@ -42,7 +42,7 @@ fn main() {
         .with(PrintingSystem, "print_sys", &[])
         .with(NotPrintingSystem, "not_print_sys", &["print_sys"])
         .with(PlayerMove, "player_move", &[])
-        .with(VulkanTriangleRenderer::default(), "vulkan_sys", &[])
+        .with_thread_local(VulkanTriangleRenderer::new())
         .with_thread_local(Render { window: root })
         .build();
 

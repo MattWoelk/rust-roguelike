@@ -21,7 +21,8 @@ use vulkano::sync;
 use vulkano::sync::{FlushError, GpuFuture};
 use vulkano_win::VkSurfaceBuild;
 
-use winit::{Event, EventsLoop, Window, WindowBuilder, WindowEvent};
+use winit::{EventsLoop, Window, WindowBuilder};
+//use winit::{Event, WindowEvent};
 
 use std::sync::Arc;
 
@@ -36,10 +37,10 @@ pub struct VulkanTriangleRenderer {
     device: Arc<Device>,
     previous_frame_end: Box<GpuFuture>,
     recreate_swapchain: bool,
-    window: Window,
+    surface: Arc<vulkano::swapchain::Surface<Window>>,
     swapchain: Arc<Swapchain<Window>>,
     framebuffers: Vec<Arc<FramebufferAbstract + std::marker::Send + std::marker::Sync>>,
-    render_pass: Arc<dyn vulkano::framebuffer::desc::RenderPassDesc>,
+    render_pass: Arc<dyn RenderPassAbstract + Send + Sync>,
     dynamic_state: DynamicState,
     queue: Arc<Queue>,
     pipeline: Arc<dyn vulkano::pipeline::GraphicsPipelineAbstract + Send + Sync + 'static>,
@@ -47,7 +48,7 @@ pub struct VulkanTriangleRenderer {
         CpuAccessibleBuffer<
             [Vertex],
             vulkano::memory::pool::PotentialDedicatedAllocation<
-                vulkano::memory::pool::pool::StdMemoryPoolAlloc,
+                vulkano::memory::pool::StdMemoryPoolAlloc,
             >,
         >,
     >,
@@ -164,7 +165,7 @@ impl VulkanTriangleRenderer {
         // Before we can draw on the surface, we have to create what is called a swapchain. Creating
         // a swapchain allocates the color buffers that will contain the image that will ultimately
         // be visible on the screen. These images are returned alongside with the swapchain.
-        let (mut swapchain, images) = {
+        let (swapchain, images) = {
             // Querying the capabilities of the surface. When we create the swapchain we can only
             // pass values that are allowed by the capabilities.
             let caps = surface.capabilities(physical).unwrap();
@@ -319,12 +320,12 @@ void main() {
 
         // Before we draw we have to create what is called a pipeline. This is similar to an OpenGL
         // program, but much more specific.
-        let pipeline = Arc::new(
+        let pipeline: Arc<dyn vulkano::pipeline::GraphicsPipelineAbstract + Send + Sync + 'static> = Arc::new(
             GraphicsPipeline::start()
                 // We need to indicate the layout of the vertices.
                 // The type `SingleBufferDefinition` actually contains a template parameter corresponding
                 // to the type of each vertex. But in this code it is automatically inferred.
-                .vertex_input_single_buffer()
+                .vertex_input_single_buffer::<Vertex>()
                 // A Vulkan shader can in theory contain multiple entry points, so we have to specify
                 // which one. The `main` word of `main_entry_point` actually corresponds to the name of
                 // the entry point.
@@ -345,7 +346,7 @@ void main() {
 
         // Dynamic viewports allow us to recreate just the viewport when the window is resized
         // Otherwise we would have to recreate the whole pipeline.
-        let dynamic_state = DynamicState {
+        let mut dynamic_state = DynamicState {
             line_width: None,
             viewports: None,
             scissors: None,
@@ -378,14 +379,14 @@ void main() {
         //
         // Destroying the `GpuFuture` blocks until the GPU is finished executing it. In order to avoid
         // that, we store the submission of the previous frame here.
-        let mut previous_frame_end = Box::new(sync::now(device.clone())) as Box<GpuFuture>;
+        let previous_frame_end = Box::new(sync::now(device.clone())) as Box<GpuFuture>;
 
         VulkanTriangleRenderer {
             instance,
             device,
             previous_frame_end,
             recreate_swapchain,
-            window: *window,
+            surface,
             swapchain,
             framebuffers,
             render_pass,
@@ -414,13 +415,15 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
         // already processed, and frees the resources that are no longer needed.
         self.previous_frame_end.cleanup_finished();
 
+        let window = self.surface.window();
+
         // Whenever the window resizes we need to recreate everything dependent on the window size.
         // In this example that includes the swapchain, the framebuffers and the dynamic state viewport.
         if self.recreate_swapchain {
             // Get the new dimensions of the window.
-            let dimensions = if let Some(dimensions) = self.window.get_inner_size() {
+            let dimensions = if let Some(dimensions) = window.get_inner_size() {
                 let dimensions: (u32, u32) = dimensions
-                    .to_physical(self.window.get_hidpi_factor())
+                    .to_physical(window.get_hidpi_factor())
                     .into();
                 [dimensions.0, dimensions.1]
             } else {
@@ -499,7 +502,7 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
         .draw(
             self.pipeline.clone(),
             &self.dynamic_state,
-            self.vertex_buffer.clone(),
+            vec![self.vertex_buffer.clone()],
             (),
             (),
         )
@@ -513,8 +516,7 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
         .build()
         .unwrap();
 
-        let future = self
-            .previous_frame_end
+        let future = self.previous_frame_end
             .join(acquire_future)
             .then_execute(self.queue.clone(), command_buffer)
             .unwrap()
@@ -549,23 +551,23 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
         // wait would happen. Blocking may be the desired behavior, but if you don't want to
         // block you should spawn a separate thread dedicated to submissions.
 
-        // Handling the window events in order to close the program when the user wants to close
-        // it.
-        let mut done = false;
-        self.events_loop.poll_events(|ev| match ev {
-            Event::WindowEvent {
-                event: WindowEvent::CloseRequested,
-                ..
-            } => done = true,
-            Event::WindowEvent {
-                event: WindowEvent::Resized(_),
-                ..
-            } => self.recreate_swapchain = true,
-            _ => (),
-        });
-        if done {
-            return;
-        }
+//        // Handling the window events in order to close the program when the user wants to close
+//        // it.
+//        let mut done = false;
+//        self.events_loop.poll_events(|ev| match ev {
+//            Event::WindowEvent {
+//                event: WindowEvent::CloseRequested,
+//                ..
+//            } => done = true,
+//            Event::WindowEvent {
+//                event: WindowEvent::Resized(_),
+//                ..
+//            } => self.recreate_swapchain = true,
+//            _ => (),
+//        });
+//        if done {
+//            return;
+//        }
     }
 }
 

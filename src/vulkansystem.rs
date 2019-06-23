@@ -38,7 +38,7 @@ pub struct VulkanTriangleRenderer {
     recreate_swapchain: bool,
     surface: Arc<vulkano::swapchain::Surface<Window>>,
     swapchain: Arc<Swapchain<Window>>,
-    framebuffers: Vec<Arc<FramebufferAbstract + std::marker::Send + std::marker::Sync>>,
+    framebuffers: Vec<Arc<dyn FramebufferAbstract + std::marker::Send + std::marker::Sync>>,
     render_pass: Arc<dyn RenderPassAbstract + Send + Sync>,
     dynamic_state: DynamicState,
     queue: Arc<Queue>,
@@ -434,7 +434,7 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
         // Calling this function polls various fences in order to determine what the GPU has
         // already processed, and frees the resources that are no longer needed.
         //let previous_frame_end = Box::new(sync::now(self.device.clone()));
-        let mut previous_frame_end = Box::new(sync::now(self.device.clone())) as Box<GpuFuture>;
+        let mut previous_frame_end = Box::new(sync::now(self.device.clone())) as Box<dyn GpuFuture>;
         previous_frame_end.cleanup_finished();
 
         let window = self.surface.window();
@@ -595,9 +595,9 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
 /// This method is called once during initialization, then again whenever the window is resized
 fn window_size_dependent_setup(
     images: &[Arc<SwapchainImage<Window>>],
-    render_pass: Arc<RenderPassAbstract + Send + Sync>,
+    render_pass: Arc<dyn RenderPassAbstract + Send + Sync>,
     dynamic_state: &mut DynamicState,
-) -> Vec<Arc<FramebufferAbstract + Send + Sync>> {
+) -> Vec<Arc<dyn FramebufferAbstract + Send + Sync>> {
     let dimensions = images[0].dimensions();
 
     let viewport = Viewport {
@@ -616,7 +616,7 @@ fn window_size_dependent_setup(
                     .unwrap()
                     .build()
                     .unwrap(),
-            ) as Arc<FramebufferAbstract + Send + Sync>
+            ) as Arc<dyn FramebufferAbstract + Send + Sync>
         })
         .collect::<Vec<_>>()
 }

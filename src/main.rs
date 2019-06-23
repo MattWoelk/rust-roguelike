@@ -1,3 +1,5 @@
+#![warn(rust_2018_idioms)]
+
 use specs::world::Builder;
 use specs::World;
 use tcod::colors;

@@ -7,6 +7,8 @@ using vulkano and specs
 
 currently https://github.com/MattWoelk/rust-roguelike
 
+Setup Instructions: https://github.com/google/shaderc-rs#building-from-source
+
 Focus the black text window to give keyboard inputs, and watch the red rectangles move.
 Move too far and the game exits (win condition??)
 

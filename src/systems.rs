@@ -53,18 +53,18 @@ impl<'a> System<'a> for Render {
             root.put_char(pos.x, pos.y, sprite.glyph, BackgroundFlag::None);
         }
         root.flush();
-        let key = root.wait_for_keypress(false);
+        //let key = root.wait_for_keypress(false);
 
-        let key_press = match key.code {
-            KeyCode::Escape => {
-                game_state.end = true;
-                None
-            }
-            key => Some(key),
-        };
+        //let key_press = match key.code {
+        //    KeyCode::Escape => {
+        //        game_state.end = true;
+        //        None
+        //    }
+        //    key => Some(key),
+        //};
 
-        game_state.key_press = key_press;
-        game_state.end |= root.window_closed();
+        //game_state.key_press = key_press;
+        //game_state.end |= root.window_closed();
     }
 }
 

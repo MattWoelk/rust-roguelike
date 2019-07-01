@@ -1,6 +1,8 @@
 // Licensed under the MIT
 // license <LICENSE-MIT or http://opensource.org/licenses/MIT>,
 
+use std::{thread, time};
+
 use specs::{Join, ReadStorage, System};
 
 use crate::components::Position;
@@ -21,7 +23,7 @@ use vulkano::sync;
 use vulkano::sync::{FlushError, GpuFuture};
 use vulkano_win::VkSurfaceBuild;
 
-use winit::{EventsLoop, Window, WindowBuilder};
+use winit::{Event, EventsLoop, Window, WindowBuilder};
 //use winit::{Event, WindowEvent};
 
 use std::sync::Arc;
@@ -402,8 +404,23 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
     type SystemData = (ReadStorage<'a, Position>);
 
     fn run(&mut self, data: Self::SystemData) {
+        thread::sleep(time::Duration::from_millis(1000));
+
         println!("Running vulkan system");
         let position = data;
+
+        self.events_loop.poll_events(|event| match event {
+            Event::DeviceEvent {
+                device_id: _,
+                event: _,
+            } => {
+                println!("DEVICE EVENT");
+            }
+            Event::WindowEvent { .. } => {
+                println!("EXIT RECEIVED");
+            }
+            _ => {}
+        });
 
         let mut verts = vec![];
 

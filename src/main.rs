@@ -41,11 +41,11 @@ fn main() {
     world.add_resource(GameState::default());
 
     let mut dispatcher = specs::DispatcherBuilder::new()
+        .with_thread_local(VulkanTriangleRenderer::new())
+        .with_thread_local(Render { window: root })
         .with(PrintingSystem, "print_sys", &[])
         .with(NotPrintingSystem, "not_print_sys", &["print_sys"])
         .with(PlayerMove, "player_move", &[])
-        .with_thread_local(VulkanTriangleRenderer::new())
-        .with_thread_local(Render { window: root })
         .build();
 
     dispatcher.setup(&mut world.res);

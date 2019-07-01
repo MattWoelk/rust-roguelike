@@ -46,7 +46,7 @@ impl<'a> System<'a> for Render {
 
         let (sprites, positions, mut game_state) = data;
 
-        game_state.end = false;
+        //game_state.end = false;
 
         root.clear();
         for (sprite, pos) in (&sprites, &positions).join() {

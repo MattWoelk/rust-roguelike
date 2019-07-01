@@ -3,9 +3,10 @@
 
 use std::{thread, time};
 
-use specs::{Join, ReadStorage, System};
-
 use crate::components::Position;
+use crate::GameState;
+
+use specs::{Join, ReadStorage, System};
 
 use vulkano::buffer::{BufferUsage, CpuAccessibleBuffer};
 use vulkano::command_buffer::{AutoCommandBufferBuilder, DynamicState};
@@ -23,7 +24,9 @@ use vulkano::sync;
 use vulkano::sync::{FlushError, GpuFuture};
 use vulkano_win::VkSurfaceBuild;
 
-use winit::{Event, EventsLoop, Window, WindowBuilder};
+use tcod::input::KeyCode;
+
+use winit::{DeviceEvent, Event, EventsLoop, VirtualKeyCode, Window, WindowBuilder};
 //use winit::{Event, WindowEvent};
 
 use std::sync::Arc;
@@ -401,19 +404,44 @@ void main() {
 }
 
 impl<'a> System<'a> for VulkanTriangleRenderer {
-    type SystemData = (ReadStorage<'a, Position>);
+    type SystemData = (ReadStorage<'a, Position>, specs::Write<'a, GameState>);
 
     fn run(&mut self, data: Self::SystemData) {
-        thread::sleep(time::Duration::from_millis(1000));
+        thread::sleep(time::Duration::from_millis(100));
 
         println!("Running vulkan system");
-        let position = data;
+        let (position, mut game_state) = data;
+
+        game_state.end = false;
+        game_state.key_press = None;
 
         self.events_loop.poll_events(|event| match event {
             Event::DeviceEvent {
                 device_id: _,
-                event: _,
+                event: ev,
             } => {
+                match ev {
+                    DeviceEvent::Key(key_input) => match key_input.virtual_keycode {
+                        Some(VirtualKeyCode::Escape) => {
+                            println!(" ~~~~~~~~~~~ EXIT FOR REAL ~~~~~~~~~~~");
+                            game_state.end = true;
+                        }
+                        Some(VirtualKeyCode::Left) => {
+                            game_state.key_press = Some(KeyCode::Left);
+                        }
+                        Some(VirtualKeyCode::Right) => {
+                            game_state.key_press = Some(KeyCode::Right);
+                        }
+                        Some(VirtualKeyCode::Up) => {
+                            game_state.key_press = Some(KeyCode::Up);
+                        }
+                        Some(VirtualKeyCode::Down) => {
+                            game_state.key_press = Some(KeyCode::Down);
+                        }
+                        _ => {}
+                    },
+                    _ => {}
+                }
                 println!("DEVICE EVENT");
             }
             Event::WindowEvent { .. } => {

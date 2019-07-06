@@ -1,8 +1,7 @@
 use specs::{Join, Read, ReadStorage, System, WriteStorage};
-use tcod::console::*;
 use tcod::input::KeyCode;
 
-use crate::components::{CharacterGlyph, PlayerController, Position, PrintMeTag};
+use crate::components::{PlayerController, Position, PrintMeTag};
 use crate::GameState;
 
 pub struct PrintingSystem;
@@ -31,42 +30,42 @@ impl<'a> System<'a> for NotPrintingSystem {
     }
 }
 
-pub struct Render {
-    pub window: Root,
-}
-impl<'a> System<'a> for Render {
-    type SystemData = (
-        ReadStorage<'a, CharacterGlyph>,
-        ReadStorage<'a, Position>,
-        specs::Write<'a, GameState>,
-    );
-
-    fn run(&mut self, data: Self::SystemData) {
-        let root = &mut self.window;
-
-        let (sprites, positions, mut game_state) = data;
-
-        //game_state.end = false;
-
-        root.clear();
-        for (sprite, pos) in (&sprites, &positions).join() {
-            root.put_char(pos.x, pos.y, sprite.glyph, BackgroundFlag::None);
-        }
-        root.flush();
-        //let key = root.wait_for_keypress(false);
-
-        //let key_press = match key.code {
-        //    KeyCode::Escape => {
-        //        game_state.end = true;
-        //        None
-        //    }
-        //    key => Some(key),
-        //};
-
-        //game_state.key_press = key_press;
-        //game_state.end |= root.window_closed();
-    }
-}
+//pub struct Render {
+//    pub window: Root,
+//}
+//impl<'a> System<'a> for Render {
+//    type SystemData = (
+//        ReadStorage<'a, CharacterGlyph>,
+//        ReadStorage<'a, Position>,
+//        specs::Write<'a, GameState>,
+//    );
+//
+//    fn run(&mut self, data: Self::SystemData) {
+//        let root = &mut self.window;
+//
+//        let (sprites, positions, mut game_state) = data;
+//
+//        //game_state.end = false;
+//
+//        root.clear();
+//        for (sprite, pos) in (&sprites, &positions).join() {
+//            root.put_char(pos.x, pos.y, sprite.glyph, BackgroundFlag::None);
+//        }
+//        root.flush();
+//        //let key = root.wait_for_keypress(false);
+//
+//        //let key_press = match key.code {
+//        //    KeyCode::Escape => {
+//        //        game_state.end = true;
+//        //        None
+//        //    }
+//        //    key => Some(key),
+//        //};
+//
+//        //game_state.key_press = key_press;
+//        //game_state.end |= root.window_closed();
+//    }
+//}
 
 pub struct PlayerMove;
 impl<'a> System<'a> for PlayerMove {

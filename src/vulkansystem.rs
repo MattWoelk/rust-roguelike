@@ -39,7 +39,6 @@ vulkano::impl_vertex!(Vertex, position);
 
 pub struct VulkanTriangleRenderer {
     device: Arc<Device>,
-    previous_frame_end: Box<dyn GpuFuture>,
     recreate_swapchain: bool,
     surface: Arc<vulkano::swapchain::Surface<Window>>,
     swapchain: Arc<Swapchain<Window>>,
@@ -48,14 +47,6 @@ pub struct VulkanTriangleRenderer {
     dynamic_state: DynamicState,
     queue: Arc<Queue>,
     pipeline: Arc<dyn vulkano::pipeline::GraphicsPipelineAbstract + Send + Sync + 'static>,
-    vertex_buffer: Arc<
-        CpuAccessibleBuffer<
-            [Vertex],
-            vulkano::memory::pool::PotentialDedicatedAllocation<
-                vulkano::memory::pool::StdMemoryPoolAlloc,
-            >,
-        >,
-    >,
     events_loop: EventsLoop,
 }
 
@@ -223,26 +214,26 @@ impl VulkanTriangleRenderer {
         };
 
         // We now create a buffer that will store the shape of our triangle.
-        let vertex_buffer = {
-            CpuAccessibleBuffer::from_iter(
-                device.clone(),
-                BufferUsage::all(),
-                [
-                    Vertex {
-                        position: [-0.5, -0.25],
-                    },
-                    Vertex {
-                        position: [0.0, 0.5],
-                    },
-                    Vertex {
-                        position: [0.25, -0.1],
-                    },
-                ]
-                .iter()
-                .cloned(),
-            )
-            .unwrap()
-        };
+        //let vertex_buffer = {
+        //    CpuAccessibleBuffer::from_iter(
+        //        device.clone(),
+        //        BufferUsage::all(),
+        //        [
+        //            Vertex {
+        //                position: [-0.5, -0.25],
+        //            },
+        //            Vertex {
+        //                position: [0.0, 0.5],
+        //            },
+        //            Vertex {
+        //                position: [0.25, -0.1],
+        //            },
+        //        ]
+        //        .iter()
+        //        .cloned(),
+        //    )
+        //    .unwrap()
+        //};
 
         // The next step is to create the shaders.
         //
@@ -388,7 +379,6 @@ void main() {
 
         VulkanTriangleRenderer {
             device,
-            previous_frame_end,
             recreate_swapchain,
             surface,
             swapchain,
@@ -397,7 +387,6 @@ void main() {
             dynamic_state,
             queue,
             pipeline,
-            vertex_buffer,
             events_loop,
         }
     }

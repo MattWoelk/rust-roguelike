@@ -10,7 +10,7 @@ mod components;
 use components::{CharacterGlyph, PlayerController, Position, PrintMeTag};
 
 mod systems;
-use systems::{NotPrintingSystem, PlayerMove, PrintingSystem, Render};
+use systems::{NotPrintingSystem, PlayerMove, PrintingSystem};
 
 mod vulkansystem;
 use vulkansystem::VulkanTriangleRenderer;
@@ -42,13 +42,16 @@ fn main() {
 
     let mut dispatcher = specs::DispatcherBuilder::new()
         .with_thread_local(VulkanTriangleRenderer::new())
-        .with_thread_local(Render { window: root })
+        //.with_thread_local(Render { window: root })
         .with(PrintingSystem, "print_sys", &[])
         .with(NotPrintingSystem, "not_print_sys", &["print_sys"])
         .with(PlayerMove, "player_move", &[])
         .build();
 
     dispatcher.setup(&mut world.res);
+
+    world.register::<Position>();
+    world.register::<CharacterGlyph>();
 
     world
         .create_entity()

@@ -24,8 +24,6 @@ use vulkano::sync;
 use vulkano::sync::{FlushError, GpuFuture};
 use vulkano_win::VkSurfaceBuild;
 
-use tcod::input::KeyCode;
-
 use winit::{DeviceEvent, Event, EventsLoop, VirtualKeyCode, Window, WindowBuilder};
 //use winit::{Event, WindowEvent};
 
@@ -416,16 +414,16 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
                             game_state.end = true;
                         }
                         Some(VirtualKeyCode::Left) => {
-                            game_state.key_press = Some(KeyCode::Left);
+                            game_state.key_press = Some(VirtualKeyCode::Left);
                         }
                         Some(VirtualKeyCode::Right) => {
-                            game_state.key_press = Some(KeyCode::Right);
+                            game_state.key_press = Some(VirtualKeyCode::Right);
                         }
                         Some(VirtualKeyCode::Up) => {
-                            game_state.key_press = Some(KeyCode::Up);
+                            game_state.key_press = Some(VirtualKeyCode::Up);
                         }
                         Some(VirtualKeyCode::Down) => {
-                            game_state.key_press = Some(KeyCode::Down);
+                            game_state.key_press = Some(VirtualKeyCode::Down);
                         }
                         _ => {}
                     },

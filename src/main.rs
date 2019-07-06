@@ -2,7 +2,6 @@
 
 use specs::world::Builder;
 use specs::World;
-use tcod::input::KeyCode;
 
 mod components;
 use components::{CharacterGlyph, PlayerController, Position, PrintMeTag};
@@ -12,11 +11,12 @@ use systems::{NotPrintingSystem, PlayerMove, PrintingSystem};
 
 mod vulkansystem;
 use vulkansystem::VulkanTriangleRenderer;
+use winit::VirtualKeyCode;
 
 #[derive(Debug, Default)]
 pub struct GameState {
     end: bool,
-    key_press: Option<KeyCode>,
+    key_press: Option<VirtualKeyCode>,
 }
 
 fn main() {
@@ -63,6 +63,4 @@ fn main() {
             break;
         }
     }
-
-    //main_vulkano();
 }

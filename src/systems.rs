@@ -1,5 +1,5 @@
 use specs::{Join, Read, ReadStorage, System, WriteStorage};
-use tcod::input::KeyCode;
+use winit::VirtualKeyCode;
 
 use crate::components::{PlayerController, Position, PrintMeTag};
 use crate::GameState;
@@ -80,10 +80,10 @@ impl<'a> System<'a> for PlayerMove {
         if let Some(key) = game_state.key_press {
             for (pos, _) in (&mut position, &player_controlled).join() {
                 match key {
-                    KeyCode::Up => pos.y -= 1,
-                    KeyCode::Down => pos.y += 1,
-                    KeyCode::Left => pos.x -= 1,
-                    KeyCode::Right => pos.x += 1,
+                    VirtualKeyCode::Up => pos.y -= 1,
+                    VirtualKeyCode::Down => pos.y += 1,
+                    VirtualKeyCode::Left => pos.x -= 1,
+                    VirtualKeyCode::Right => pos.x += 1,
                     _ => {}
                 }
             }

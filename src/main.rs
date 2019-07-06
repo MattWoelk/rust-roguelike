@@ -2,8 +2,6 @@
 
 use specs::world::Builder;
 use specs::World;
-use tcod::colors;
-use tcod::console::*;
 use tcod::input::KeyCode;
 
 mod components;
@@ -15,10 +13,6 @@ use systems::{NotPrintingSystem, PlayerMove, PrintingSystem};
 mod vulkansystem;
 use vulkansystem::VulkanTriangleRenderer;
 
-const SCREEN_WIDTH: i32 = 80;
-const SCREEN_HEIGHT: i32 = 50;
-const LIMIT_FPS: i32 = 20;
-
 #[derive(Debug, Default)]
 pub struct GameState {
     end: bool,
@@ -26,17 +20,6 @@ pub struct GameState {
 }
 
 fn main() {
-    let mut root = Root::initializer()
-        .font("terminal.png", FontLayout::Tcod)
-        .font_type(FontType::Greyscale)
-        .size(SCREEN_WIDTH, SCREEN_HEIGHT)
-        .title("Roguelike using specs")
-        .init();
-
-    root.set_default_foreground(colors::WHITE);
-
-    tcod::system::set_fps(LIMIT_FPS);
-
     let mut world = World::new();
     world.add_resource(GameState::default());
 

@@ -24,7 +24,7 @@ use vulkano::sync;
 use vulkano::sync::{FlushError, GpuFuture};
 use vulkano_win::VkSurfaceBuild;
 
-use winit::{DeviceEvent, Event, EventsLoop, VirtualKeyCode, Window, WindowBuilder};
+use winit::{DeviceEvent, ElementState, Event, EventsLoop, VirtualKeyCode, Window, WindowBuilder};
 //use winit::{Event, WindowEvent};
 
 use std::sync::Arc;
@@ -408,25 +408,27 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
                 event: ev,
             } => {
                 match ev {
-                    DeviceEvent::Key(key_input) => match key_input.virtual_keycode {
-                        Some(VirtualKeyCode::Escape) => {
-                            //println!(" ~~~~~~~~~~~ EXIT FOR REAL ~~~~~~~~~~~");
-                            game_state.end = true;
+                    DeviceEvent::Key(key_input) => {
+                        match (key_input.state, key_input.virtual_keycode) {
+                            (ElementState::Pressed, Some(VirtualKeyCode::Escape)) => {
+                                //println!(" ~~~~~~~~~~~ EXIT FOR REAL ~~~~~~~~~~~");
+                                game_state.end = true;
+                            }
+                            (ElementState::Pressed, Some(VirtualKeyCode::Left)) => {
+                                game_state.key_press = Some(VirtualKeyCode::Left);
+                            }
+                            (ElementState::Pressed, Some(VirtualKeyCode::Right)) => {
+                                game_state.key_press = Some(VirtualKeyCode::Right);
+                            }
+                            (ElementState::Pressed, Some(VirtualKeyCode::Up)) => {
+                                game_state.key_press = Some(VirtualKeyCode::Up);
+                            }
+                            (ElementState::Pressed, Some(VirtualKeyCode::Down)) => {
+                                game_state.key_press = Some(VirtualKeyCode::Down);
+                            }
+                            _ => {}
                         }
-                        Some(VirtualKeyCode::Left) => {
-                            game_state.key_press = Some(VirtualKeyCode::Left);
-                        }
-                        Some(VirtualKeyCode::Right) => {
-                            game_state.key_press = Some(VirtualKeyCode::Right);
-                        }
-                        Some(VirtualKeyCode::Up) => {
-                            game_state.key_press = Some(VirtualKeyCode::Up);
-                        }
-                        Some(VirtualKeyCode::Down) => {
-                            game_state.key_press = Some(VirtualKeyCode::Down);
-                        }
-                        _ => {}
-                    },
+                    }
                     _ => {}
                 }
                 //println!("DEVICE EVENT");

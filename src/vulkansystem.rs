@@ -394,9 +394,9 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
     type SystemData = (ReadStorage<'a, Position>, specs::Write<'a, GameState>);
 
     fn run(&mut self, data: Self::SystemData) {
-        thread::sleep(time::Duration::from_millis(100));
+        thread::sleep(time::Duration::from_millis(10));
 
-        println!("Running vulkan system");
+        //println!("Running vulkan system");
         let (position, mut game_state) = data;
 
         game_state.end = false;
@@ -410,7 +410,7 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
                 match ev {
                     DeviceEvent::Key(key_input) => match key_input.virtual_keycode {
                         Some(VirtualKeyCode::Escape) => {
-                            println!(" ~~~~~~~~~~~ EXIT FOR REAL ~~~~~~~~~~~");
+                            //println!(" ~~~~~~~~~~~ EXIT FOR REAL ~~~~~~~~~~~");
                             game_state.end = true;
                         }
                         Some(VirtualKeyCode::Left) => {
@@ -429,10 +429,10 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
                     },
                     _ => {}
                 }
-                println!("DEVICE EVENT");
+                //println!("DEVICE EVENT");
             }
             Event::WindowEvent { .. } => {
-                println!("EXIT RECEIVED");
+                //println!("EXIT RECEIVED");
             }
             _ => {}
         });
@@ -440,7 +440,7 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
         let mut verts = vec![];
 
         for pos in (&position).join() {
-            println!("  {:?}", pos);
+            //println!("  {:?}", pos);
             verts.push(Vertex {
                 position: [pos.x as f32 / 30.0 - 0.3, pos.y as f32 / 30.0],
             });
@@ -590,7 +590,7 @@ impl<'a> System<'a> for VulkanTriangleRenderer {
                     Box::new(sync::now(self.device.clone())) as Box<_>
                 }
                 Err(e) => {
-                    println!("{:?}", e);
+                    //println!("{:?}", e);
                     Box::new(sync::now(self.device.clone())) as Box<_>
                 }
             }

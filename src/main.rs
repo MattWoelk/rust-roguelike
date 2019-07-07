@@ -26,14 +26,15 @@ fn main() {
     let mut dispatcher = specs::DispatcherBuilder::new()
         .with_thread_local(VulkanTriangleRenderer::new())
         //.with_thread_local(Render { window: root })
-        .with(PrintingSystem, "print_sys", &[])
-        .with(NotPrintingSystem, "not_print_sys", &["print_sys"])
+        //.with(PrintingSystem, "print_sys", &[])
+        //.with(NotPrintingSystem, "not_print_sys", &["print_sys"])
         .with(PlayerMove, "player_move", &[])
         .build();
 
     dispatcher.setup(&mut world.res);
 
     world.register::<Position>();
+    world.register::<PrintMeTag>();
     world.register::<CharacterGlyph>();
 
     world
